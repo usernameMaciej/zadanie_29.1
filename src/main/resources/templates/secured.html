@@ -16,16 +16,15 @@
 <div class="container">
     <h1>Udało ci się poprawnie zalogować!</h1>
 
-  <i class="fa-sharp fa-light fa-check fa-10x"></i><br>
-
+  <i class="fa-sharp fa-light fa-check fa-5x"></i><br/>
 
     <h2>Zmiana danych:</h2>
     <form class="login-form" th:action="@{/change-data-user}" method="post" th:object="${user}">
+        <button th:text="|Twój email: *{email}|" disabled></button>
         <input th:value="*{firstName}" placeholder="imię" class="form-item"><br>
         <input th:value="*{lastName}" placeholder="nazwisko" class="form-item"><br>
-        <input th:value="*{password}" placeholder="hasło" type="password" class="form-item"><br>
         <button type="submit" class="form-item">Zmień dane</button>
-    </form>
+    </form><br/>
 
     <a th:authorize="${#authentication.isAuthenticated()}"
        th:text="|Wyloguj się ${#authentication.name}|"

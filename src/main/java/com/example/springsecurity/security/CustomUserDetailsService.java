@@ -1,6 +1,6 @@
 package com.example.springsecurity.security;
 
-import com.example.springsecurity.user.UserService;
+import com.example.springsecurity.user.UserCredentialsService;
 import com.example.springsecurity.user.dto.UserCredentialsDto;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -12,16 +12,16 @@ import org.springframework.transaction.annotation.Transactional;
 @Service
 public class CustomUserDetailsService implements UserDetailsService {
 
-    private final UserService userService;
+    private final UserCredentialsService userCredentialsService;
 
-    public CustomUserDetailsService(UserService userService) {
-        this.userService = userService;
+    public CustomUserDetailsService(UserCredentialsService userCredentialsService) {
+        this.userCredentialsService = userCredentialsService;
     }
 
     @Transactional
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-        return userService.findByEmail(username)
+        return userCredentialsService.findCredentialsByEmail(username)
                 .map(this::createUserDetails)
                 .orElseThrow(() -> new UsernameNotFoundException("Użytkownik z emailem: " + username + " nie istnieje"));
     }

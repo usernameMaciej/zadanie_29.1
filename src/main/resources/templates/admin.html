@@ -16,7 +16,7 @@
     <h2>Lista użytkowników</h2>
     <ul>
         <li th:each="email: ${allUserEmails}">
-            <span th:text="${email}"></span>
+            <span th:text="|${email}|"></span>
             <a th:href="@{/admin/change-user-role(email=${email})}">(Nadaj rolę admina)</a>
         </li>
     </ul>

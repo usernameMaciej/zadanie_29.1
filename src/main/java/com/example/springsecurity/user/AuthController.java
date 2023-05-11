@@ -1,11 +1,16 @@
 package com.example.springsecurity.user;
 
+import com.example.springsecurity.user.dto.UserEditDto;
 import com.example.springsecurity.user.dto.UserRegisterDto;
+import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.server.ResponseStatusException;
+
+import static org.springframework.http.HttpStatus.NOT_FOUND;
 
 @Controller
 public class AuthController {
@@ -33,12 +38,6 @@ public class AuthController {
         return "redirect:/admin";
     }
 
-    @GetMapping("/secured")
-    String secured(Model model) {
-        model.addAttribute("user", new UserRegisterDto());
-        return "secured";
-    }
-
     @GetMapping("/register")
     String register(Model model) {
         model.addAttribute("user", new UserRegisterDto());
@@ -51,9 +50,18 @@ public class AuthController {
         return "register-success";
     }
 
-    @PostMapping("/change-data-user")
-    String changeDataUser(UserRegisterDto userRegisterDto) {
-        userService.changeDataUser(userRegisterDto);
-        return "redirect:/";
+    @GetMapping("/secured")
+    String secured(Model model, Authentication authentication) {
+        String email = authentication.getName();
+        UserEditDto userEditDto = userService.findByEmail(email).orElseThrow(() -> new ResponseStatusException(NOT_FOUND));
+        model.addAttribute("user", userEditDto);
+        return "secured";
     }
+
+    @PostMapping("/change-data-user")
+    String changeDataUser(UserEditDto userEditDto) {
+        userService.changeDataUser(userEditDto);
+        return "redirect:/secured";
+    }
+
 }
