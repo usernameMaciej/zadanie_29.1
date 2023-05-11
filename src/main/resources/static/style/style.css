@@ -1,0 +1,21 @@
+.container {
+    margin: 0 auto;
+    max-width: 400px;
+    text-align: center;
+}
+
+.login-form {
+    display: flex;
+    flex-direction: column;
+    margin-top: 32px;
+    align-items: center;
+}
+
+.form-item {
+    margin: 2px 0;
+    width: 100%;
+}
+
+.main-picture {
+max-width: 100%;
+}
