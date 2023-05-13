@@ -1,6 +1,5 @@
 package com.example.springsecurity.user;
 
-import com.example.springsecurity.user.dto.UserCredentialsDto;
 import com.example.springsecurity.user.dto.UserEditDto;
 import com.example.springsecurity.user.dto.UserRegisterDto;
 import org.springframework.security.core.Authentication;
@@ -13,13 +12,15 @@ import org.springframework.web.server.ResponseStatusException;
 import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Optional;
-import java.util.Set;
 import java.util.stream.Collectors;
 
 import static org.springframework.http.HttpStatus.NOT_FOUND;
 
 @Service
 public class UserService {
+
+    private static final String USER_ROLE = "USER";
+    private static final String ADMIN_ROLE = "ADMIN";
 
     private final UserRepository userRepository;
     private final UserRoleRepository userRoleRepository;
@@ -32,7 +33,7 @@ public class UserService {
     }
 
     public List<String> findAllUserEmails() {
-        return userRepository.findAllUsersByUserRoles_Name("USER")
+        return userRepository.findAllUsersByUserRoles_Name(USER_ROLE)
                 .stream()
                 .map(User::getEmail)
                 .collect(Collectors.toList());
@@ -47,23 +48,25 @@ public class UserService {
         String passwordHash = passwordEncoder.encode(userRegisterDto.getPassword());
         user.setPassword(passwordHash);
 
-        Optional<UserRole> userRole = userRoleRepository.findByName("USER");
+        Optional<UserRole> userRole = userRoleRepository.findByName(USER_ROLE);
         userRole.ifPresentOrElse(
                 role -> user.getUserRoles().add(role),
-                () -> { throw new NoSuchElementException(); }
+                () -> {
+                    throw new NoSuchElementException();
+                }
         );
         userRepository.save(user);
     }
 
     @Transactional
-    public void changeDataUser(UserEditDto userEditDto) {
+    public void changeDataUser(String firstName, String lastName) {
 
         Authentication currentUser = SecurityContextHolder.getContext().getAuthentication();
         String email = currentUser.getName();
 
         User user = userRepository.findByEmail(email).orElseThrow(() -> new ResponseStatusException(NOT_FOUND));
-        user.setFirstName(userEditDto.getFirstName());
-        user.setLastName(userEditDto.getLastName());
+        user.setFirstName(firstName);
+        user.setLastName(lastName);
         userRepository.save(user);
     }
 
@@ -79,12 +82,26 @@ public class UserService {
     }
 
     @Transactional
-    public void changeUserRole(String email) {
+    public void assignAdminRole(String email) {
         User user = userRepository.findByEmail(email).orElseThrow(() -> new ResponseStatusException(NOT_FOUND));
-        Optional<UserRole> userRole = userRoleRepository.findByName("ADMIN");
-        userRole.ifPresentOrElse(
+
+        Optional<UserRole> adminRole = userRoleRepository.findByName(ADMIN_ROLE);
+        adminRole.ifPresentOrElse(
                 role -> user.getUserRoles().add(role),
-                () -> { throw new NoSuchElementException(); }
+                () -> {
+                    throw new NoSuchElementException();
+                }
+        );
+        userRepository.save(user);
+    }
+
+    @Transactional
+    public void dismissAdminRole(String email) {
+        User user = userRepository.findByEmail(email).orElseThrow(() -> new ResponseStatusException(NOT_FOUND));
+
+        Optional<UserRole> adminRole = userRoleRepository.findByName(ADMIN_ROLE);
+        adminRole.ifPresentOrElse(role -> user.getUserRoles().remove(role),
+                () -> { throw new NoSuchElementException();}
         );
         userRepository.save(user);
     }

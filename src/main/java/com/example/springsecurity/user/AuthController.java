@@ -22,20 +22,19 @@ public class AuthController {
     }
 
     @GetMapping("/login")
-    String login() {
+    String login(@RequestParam(required = false) String registered, Model model) {
+        boolean message = false;
+        if (registered != null) {
+            message = true;
+        }
+        model.addAttribute("message", message);
         return "login";
     }
 
-    @GetMapping("/admin")
-    String admin(Model model) {
-        model.addAttribute("allUserEmails", userService.findAllUserEmails());
-        return "admin";
-    }
-
-    @GetMapping("/admin/change-user-role")
-    String changeUserRole(@RequestParam String email) {
-        userService.changeUserRole(email);
-        return "redirect:/admin";
+    @PostMapping("/register")
+    String registerForm(UserRegisterDto userRegisterDto) {
+        userService.register(userRegisterDto);
+        return "redirect:/login?registered=true";
     }
 
     @GetMapping("/register")
@@ -44,10 +43,22 @@ public class AuthController {
         return "register";
     }
 
-    @PostMapping("/register")
-    String registerForm(UserRegisterDto userRegisterDto) {
-        userService.register(userRegisterDto);
-        return "register-success";
+    @GetMapping("/admin")
+    String admin(Model model) {
+        model.addAttribute("allUserEmails", userService.findAllUserEmails());
+        return "admin";
+    }
+
+    @GetMapping("/admin/assign-admin-role")
+    String assignAdminRole(@RequestParam String email) {
+        userService.assignAdminRole(email);
+        return "redirect:/admin";
+    }
+
+    @GetMapping("/admin/dismiss-admin-role")
+    String dismissAdminRole(@RequestParam String email) {
+        userService.dismissAdminRole(email);
+        return "redirect:/admin";
     }
 
     @GetMapping("/secured")
@@ -59,8 +70,8 @@ public class AuthController {
     }
 
     @PostMapping("/change-data-user")
-    String changeDataUser(UserEditDto userEditDto) {
-        userService.changeDataUser(userEditDto);
+    String changeDataUser(String firstName, String lastName) {
+        userService.changeDataUser(firstName, lastName);
         return "redirect:/secured";
     }
 

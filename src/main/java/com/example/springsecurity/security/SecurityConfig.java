@@ -1,5 +1,6 @@
 package com.example.springsecurity.security;
 
+import org.springframework.boot.autoconfigure.security.servlet.PathRequest;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -17,13 +18,14 @@ public class SecurityConfig {
                 .requestMatchers("/", "/register").permitAll()
                 .requestMatchers("/img/**", "/style/**").permitAll()
                 .requestMatchers("/static/**").permitAll()
-                .requestMatchers("/h2-console/**").permitAll()
+                .requestMatchers(new AntPathRequestMatcher("/h2-console/**")).permitAll()
                 .requestMatchers("/secured").hasAnyRole("USER", "ADMIN")
                 .requestMatchers("/admin/**").hasRole("ADMIN")
                 .anyRequest().authenticated());
         http.formLogin(login -> login.loginPage("/login").permitAll());
         http.logout().logoutRequestMatcher(new AntPathRequestMatcher("/logout", "GET")).logoutSuccessUrl("/");
         http.csrf().disable();
+        http.headers().frameOptions().disable();
         return http.build();
     }
 

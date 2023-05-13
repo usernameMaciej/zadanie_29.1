@@ -13,6 +13,9 @@
 <body>
 
 <div class="container">
+
+    <p th:if="${message}">Udało ci się poprawnie zarejestrować</p>
+
     <h1 class="login-header">Zaloguj się</h1>
     <i class="fa-solid fa-right-to-bracket fa-10x"></i>
     <form class="login-form" th:action="@{/login}" method="post">
