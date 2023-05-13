@@ -14,6 +14,7 @@
 <body>
 
 <div class="container">
+
     <h1>Strona dla zalogowanych</h1>
 
     <h2>Zmiana danych:</h2>
@@ -23,6 +24,10 @@
         <input th:field="*{lastName}" placeholder="nazwisko" class="form-item"><br>
         <button type="submit" class="form-item">Zmień dane</button>
     </form><br/>
+
+    <p th:if="${message}">Dane zostały zapisane</p><br>
+
+    <a th:href="@{/}"><button>Powrót na stronę główną</button></a><br>
 
     <a th:authorize="${#authentication.isAuthenticated()}"
        th:text="|Wyloguj się ${#authentication.name}|"

@@ -15,12 +15,15 @@
     <h1>Panel admina</h1>
     <h2>Lista użytkowników</h2>
     <ul>
-        <li th:each="email: ${allUserEmails}">
-            <span th:text="|${email}|"></span>
-            <a th:href="@{/admin/assign-admin-role(email=${email})}" >(Nadaj rolę admina)</a><br>
-            <a th:href="@{/admin/dismiss-admin-role(email=${email})}" >(Odbierz rolę admina)</a>
+        <li th:each="user: ${users}">
+            <span th:text="|${user.email}|"></span>
+            <a th:if="${user.admin}" th:href="@{/admin/change-role(email=${user.email})}" >(Nadaj rolę admina)</a><br>
+            <a th:unless="${user.admin}" th:href="@{/admin/change-role(email=${user.email})}" >(Odbierz rolę admina)</a><br>
         </li>
     </ul>
+
+    <a th:href="@{/}"><button>Powrót na stronę główną</button></a>
+
 </div>
 </body>
 </html>

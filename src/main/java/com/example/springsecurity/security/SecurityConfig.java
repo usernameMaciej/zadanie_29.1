@@ -18,8 +18,9 @@ public class SecurityConfig {
                 .requestMatchers("/", "/register").permitAll()
                 .requestMatchers("/img/**", "/style/**").permitAll()
                 .requestMatchers("/static/**").permitAll()
+                .requestMatchers("/login/**").permitAll()
                 .requestMatchers(new AntPathRequestMatcher("/h2-console/**")).permitAll()
-                .requestMatchers("/secured").hasAnyRole("USER", "ADMIN")
+                .requestMatchers("/secured/**").hasAnyRole("USER", "ADMIN")
                 .requestMatchers("/admin/**").hasRole("ADMIN")
                 .anyRequest().authenticated());
         http.formLogin(login -> login.loginPage("/login").permitAll());

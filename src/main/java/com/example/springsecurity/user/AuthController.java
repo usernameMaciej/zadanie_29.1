@@ -2,6 +2,7 @@ package com.example.springsecurity.user;
 
 import com.example.springsecurity.user.dto.UserEditDto;
 import com.example.springsecurity.user.dto.UserRegisterDto;
+import com.example.springsecurity.user.dto.UserRoleWithEmailDto;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -45,24 +46,23 @@ public class AuthController {
 
     @GetMapping("/admin")
     String admin(Model model) {
-        model.addAttribute("allUserEmails", userService.findAllUserEmails());
+        model.addAttribute("users", userService.findAllUserRoleEmails());
         return "admin";
     }
 
-    @GetMapping("/admin/assign-admin-role")
-    String assignAdminRole(@RequestParam String email) {
-        userService.assignAdminRole(email);
-        return "redirect:/admin";
-    }
-
-    @GetMapping("/admin/dismiss-admin-role")
-    String dismissAdminRole(@RequestParam String email) {
-        userService.dismissAdminRole(email);
+    @GetMapping("/admin/change-role")
+    String assignAdminRole(@RequestParam UserRoleWithEmailDto userRoleWithEmailDto) {
+        userService.changeRole(userRoleWithEmailDto);
         return "redirect:/admin";
     }
 
     @GetMapping("/secured")
-    String secured(Model model, Authentication authentication) {
+    String secured(@RequestParam(required = false) String success, Model model, Authentication authentication) {
+        boolean message = false;
+        if (success != null) {
+            message = true;
+        }
+        model.addAttribute("message", message);
         String email = authentication.getName();
         UserEditDto userEditDto = userService.findByEmail(email).orElseThrow(() -> new ResponseStatusException(NOT_FOUND));
         model.addAttribute("user", userEditDto);
@@ -72,7 +72,7 @@ public class AuthController {
     @PostMapping("/change-data-user")
     String changeDataUser(String firstName, String lastName) {
         userService.changeDataUser(firstName, lastName);
-        return "redirect:/secured";
+        return "redirect:/secured?success";
     }
 
 }

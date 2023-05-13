@@ -2,6 +2,7 @@ package com.example.springsecurity.user;
 
 import com.example.springsecurity.user.dto.UserEditDto;
 import com.example.springsecurity.user.dto.UserRegisterDto;
+import com.example.springsecurity.user.dto.UserRoleWithEmailDto;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -12,6 +13,7 @@ import org.springframework.web.server.ResponseStatusException;
 import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Optional;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import static org.springframework.http.HttpStatus.NOT_FOUND;
@@ -32,11 +34,16 @@ public class UserService {
         this.passwordEncoder = passwordEncoder;
     }
 
-    public List<String> findAllUserEmails() {
-        return userRepository.findAllUsersByUserRoles_Name(USER_ROLE)
+    public List<UserRoleWithEmailDto> findAllUserRoleEmails() {
+        return userRepository.findAll()
                 .stream()
-                .map(User::getEmail)
+                .map(this::userToUserRoleWithEmailDto)
                 .collect(Collectors.toList());
+    }
+
+    private UserRoleWithEmailDto userToUserRoleWithEmailDto(User user) {
+        // nie mam pojecia jak to sprawdzic przez tego booleana chociazby czy jest adminem czy userem
+        return new UserRoleWithEmailDto(user.getEmail(), user.getUserRoles().);
     }
 
     @Transactional
@@ -81,28 +88,25 @@ public class UserService {
                 user.getEmail());
     }
 
-    @Transactional
-    public void assignAdminRole(String email) {
-        User user = userRepository.findByEmail(email).orElseThrow(() -> new ResponseStatusException(NOT_FOUND));
-
-        Optional<UserRole> adminRole = userRoleRepository.findByName(ADMIN_ROLE);
-        adminRole.ifPresentOrElse(
-                role -> user.getUserRoles().add(role),
-                () -> {
-                    throw new NoSuchElementException();
-                }
-        );
-        userRepository.save(user);
-    }
 
     @Transactional
-    public void dismissAdminRole(String email) {
-        User user = userRepository.findByEmail(email).orElseThrow(() -> new ResponseStatusException(NOT_FOUND));
-
+    public void changeRole(UserRoleWithEmailDto userRoleWithEmailDto) {
+        User user = userRepository.findByEmail(userRoleWithEmailDto.getEmail()).orElseThrow(() -> new ResponseStatusException(NOT_FOUND));
         Optional<UserRole> adminRole = userRoleRepository.findByName(ADMIN_ROLE);
-        adminRole.ifPresentOrElse(role -> user.getUserRoles().remove(role),
-                () -> { throw new NoSuchElementException();}
-        );
+
+        if (!userRoleWithEmailDto.isAdmin()) {
+            adminRole.ifPresentOrElse(
+                    role -> user.getUserRoles().add(role),
+                    () -> {
+                        throw new NoSuchElementException();}
+            );
+        } else {
+            adminRole.ifPresentOrElse(
+                    role -> user.getUserRoles().remove(role),
+                    () -> { throw new NoSuchElementException();}
+            );
+            userRepository.save(user);
+        }
         userRepository.save(user);
     }
 }
